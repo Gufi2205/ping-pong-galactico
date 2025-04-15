@@ -1,51 +1,51 @@
 class Escena extends Phaser.Scene{
 
   preload() {
-    this.load.image("fondo", "img/img/fondo.jpg");
-    this.load.spritesheet("bola", "img/img/bola.png", {
-      frameWidth: 100,
-      frameHeight: 100,
-    });
+    this.load.image("fondo", "img/julio/fondo.jpg");
+    this.load.image("bola", "img/julio/bola.png");
 
-    this.load.image("mano1", "img/img/mano1.png");
-    this.load.image("mano2", "img/img/mano2.png");
-    this.load.image("leftbtn", "img/img/flecha.png");
+    this.load.image("mano1", "img/julio/mano1.png");
+    this.load.image("mano2", "img/julio/mano2.png");
+    this.load.image("leftbtn", "img/julio/flecha.png");
+
+    this.load.audio('musicaFondo', 'img/julio/fondo.mp3');
+    this.load.audio('sonidoMano1', 'img/julio/colision1.mp3');
+    this.load.audio('sonidoMano2', 'img/julio/colision3.mp3');
+    this.load.audio('puntoSonido', 'img/julio/colision2.mp3');
   }
 
   create(){
+
+    this.musica = this.sound.add('musicaFondo', { loop: true, volume: 0.3 });
+    this.musica.play();
 
     this.input.addPointer();
     this.input.addPointer();
     this.input.addPointer();
 
       this.add.sprite(480,320, 'fondo');
-      this.bola = this.physics.add.sprite(480,320, 'bola');
+      this.bola = this.physics.add.image(480, 320, 'bola').setScale(0.3);
 
-      this.anims.create({
-          key:'brillar',
-          frames: this.anims.generateFrameNumbers('bola',{
-              start: 0,
-              end:3
-          }),
-          frameRate: 10,
-          repeat: -1
-      });
-      this.bola.play('brillar');
+      
 
       this.bola.setBounce(1);
-      this.mano1 = this.physics.add.sprite(70, 320, "mano1");
+      this.mano1 = this.physics.add.sprite(70, 320, "mano1").setScale(0.8);
       this.mano1.body.immovable = true;
       this.bola.setBounce(10);
       this.mano1.setSize(60, 250);
-      this.physics.add.collider(this.bola, this.mano1);
-      this.mano1.setCollideWorldBounds(true);
+      this.physics.add.collider(this.bola, this.mano1, () => {
+        this.sound.play('sonidoMano1', { volume: 0.2 });
+      });
+           this.mano1.setCollideWorldBounds(true);
 
       this.mano2 = this.physics.add.sprite(882, 320, "mano2");
       this.mano2.body.immovable = true;
       this.bola.setBounce(10);
       this.mano2.setSize(60, 250);
-      this.physics.add.collider(this.bola, this.mano2);
-      this.mano2.setCollideWorldBounds(true);
+      this.physics.add.collider(this.bola, this.mano2, () => {
+        this.sound.play('sonidoMano2', { volume: 0.2 });
+      });
+           this.mano2.setCollideWorldBounds(true);
 
       
       const velocidad = 500;
@@ -99,12 +99,14 @@ class Escena extends Phaser.Scene{
       this.bola.rotation +=0.1;
 
       if (this.bola.x < 0 && this.alguienGano === false) {
+        this.sound.play('puntoSonido', { volume: 0.2 });
+
         this.alguienGano = true;
         this.marcadorMano2.text = parseInt(this.marcadorMano2.text) + 1;
         this.colocarPelota();
     } else if (this.bola.x > 960 && this.alguienGano === false) {
-        this.alguienGano = true;
-        this.marcadorMano1.text = parseInt(this.marcadorMano1.text) + 1;
+      this.sound.play('puntoSonido', { volume: 0.2 });
+      this.marcadorMano1.text = parseInt(this.marcadorMano1.text) + 1;
         this.colocarPelota();
     }
 
@@ -148,8 +150,8 @@ class Escena extends Phaser.Scene{
     const vy = Math.cos(anguloInicial) * velocidad;
 
 
-    this.bola = this.physics.add.sprite(480, 320, 'bola');
-    this.bola.play('brillar');
+    this.bola = this.physics.add.image(480, 320, 'bola').setScale(0.3);
+
 
     this.bola.setBounce(1);
     this.physics.world.enable(this.bola);
@@ -160,14 +162,20 @@ class Escena extends Phaser.Scene{
 
     this.bola.body.velocity.x = vx;
     this.bola.body.velocity.y = vy;
-    this.physics.add.collider(this.bola, this.mano1);
-    this.physics.add.collider(this.bola, this.mano2);
+    this.physics.add.collider(this.bola, this.mano1, () => {
+      this.sound.play('sonidoMano1', { volume: 0.2 });
+    });
+    
+    this.physics.add.collider(this.bola, this.mano2, () => {
+      this.sound.play('sonidoMano2', { volume: 0.2 });
+    });
+    
     this.alguienGano = false;
 }
 
   controlesVisaules(btn1, btn2, player) {
-    const upbtn = this.add.sprite(btn1.x, btn1.y, "leftbtn").setInteractive();
-    const downbtn = this.add.sprite(btn2.x, btn2.y, "leftbtn").setInteractive();
+    const upbtn = this.add.sprite(btn1.x, btn1.y, "leftbtn").setInteractive().setScale(0.3);
+    const downbtn = this.add.sprite(btn2.x, btn2.y, "leftbtn").setInteractive().setScale(0.3);
     downbtn.flipY = true;
 
     downbtn.on("pointerdown", () => {
